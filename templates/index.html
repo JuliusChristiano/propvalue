@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropValue AI - Platform Valuation & Edukasi Properti</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- LINK KE FILE CSS DARI FOLDER static/css/style.css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="flex flex-col min-h-full text-slate-200 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('home')">
+                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2.5 rounded-2xl text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition duration-300">
+                        <i class="fa-solid fa-house-laptop text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-tight text-white">PropValue <span class="gradient-text">AI</span></span>
+                        <span class="block text-[10px] text-slate-400 font-medium tracking-widest uppercase -mt-1">PropTech Intelligence</span>
+                    </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden xl:flex items-center space-x-1 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800/80">
+                    <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-white bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-md">
+                        <i class="fa-solid fa-compass mr-1.5"></i> Beranda
+                    </button>
+                    <button onclick="switchTab('predict')" id="nav-predict" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-brain mr-1.5 text-indigo-400"></i> Prediksi AI
+                    </button>
+                    <button onclick="switchTab('properties')" id="nav-properties" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-city mr-1.5 text-indigo-400"></i> Katalog
+                    </button>
+                    <button onclick="switchTab('compare')" id="nav-compare" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-code-compare mr-1.5 text-indigo-400"></i> Komparasi
+                    </button>
+                    <button onclick="switchTab('calculator')" id="nav-calculator" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-calculator mr-1.5 text-indigo-400"></i> Kalkulator KPR
+                    </button>
+                    <button onclick="switchTab('investment')" id="nav-investment" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-chart-pie mr-1.5 text-indigo-400"></i> ROI & Yield
+                    </button>
+                    <button onclick="switchTab('education')" id="nav-education" class="nav-btn px-4 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-graduation-cap mr-1.5 text-indigo-400"></i> Edukasi
+                    </button>
+                    <button onclick="switchTab('saved')" id="nav-saved" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold hover:text-white transition duration-200 text-slate-400 hover:bg-slate-800 relative">
+                        <i class="fa-solid fa-heart text-rose-500 mr-1.5"></i> Favorit
+                        <span id="saved-count-badge" class="ml-1 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm shadow-rose-500/50">0</span>
+                    </button>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="xl:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden xl:hidden bg-slate-900/95 border-b border-slate-800 px-4 pt-3 pb-4 space-y-2 text-sm">
+            <button onclick="switchTab('home')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">Beranda</button>
+            <button onclick="switchTab('predict')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">Prediksi AI</button>
+            <button onclick="switchTab('properties')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">Katalog Properti</button>
+            <button onclick="switchTab('compare')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">Komparasi Properti</button>
+            <button onclick="switchTab('calculator')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">Kalkulator KPR</button>
+            <button onclick="switchTab('investment')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">ROI & Investment</button>
+            <button onclick="switchTab('education')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition">Portal Edukasi</button>
+            <button onclick="switchTab('saved')" class="w-full text-left px-4 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-indigo-600 hover:text-white transition flex justify-between items-center">
+                <span>Favorit Saya</span>
+                <span id="mobile-saved-badge" class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- TAB 1: BERANDA / LANDING PAGE -->
+        <section id="tab-home" class="tab-content block space-y-12">
+            <!-- Hero Section -->
+            <div class="relative bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 sm:p-14 text-white overflow-hidden shadow-2xl border border-slate-800">
+                <div class="absolute -right-20 -top-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 max-w-3xl">
+                    <div class="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-wider mb-6">
+                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                        PropTech Valuation Platform v2.5
+                    </div>
+                    <h1 class="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
+                        Penilaian Properti Presisi Berbasis <span class="gradient-text">Machine Learning</span>
+                    </h1>
+                    <p class="text-slate-300 mt-6 text-base sm:text-lg leading-relaxed">
+                        Estimasi harga wajar rumah secara objektif dengan algoritma Decision Tree, hitung simulasi KPR, kelayakan angsuran, proyeksi ROI sewa, dan akses portal legalitas tanpa biaya.
+                    </p>
+                    <div class="mt-10 flex flex-wrap gap-4">
+                        <button onclick="switchTab('predict')" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl shadow-lg shadow-indigo-600/30 transition duration-300 flex items-center gap-3 transform hover:-translate-y-0.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i> Coba Prediksi AI Sekarang
+                        </button>
+                        <button onclick="switchTab('calculator')" class="glass-card hover:bg-slate-800/80 text-slate-200 border border-slate-700 font-bold px-8 py-4 rounded-2xl transition duration-300 flex items-center gap-3">
+                            <i class="fa-solid fa-calculator text-indigo-400"></i> Hitung KPR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics & Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card p-6 rounded-3xl hover:border-indigo-500/40 transition duration-300 group">
+                    <div class="w-14 h-14 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition duration-300 border border-indigo-500/20">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Decision Tree Engine</h3>
+                    <p class="text-sm text-slate-400 mt-2 leading-relaxed">Menggunakan algoritma pohon keputusan untuk memproses multi-parameter fisik & spesifikasi rumah.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl hover:border-emerald-500/40 transition duration-300 group">
+                    <div class="w-14 h-14 bg-emerald-500/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition duration-300 border border-emerald-500/20">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Fair Value Index</h3>
+                    <p class="text-sm text-slate-400 mt-2 leading-relaxed">Analisis status wajar pasar apakah rumah masuk kategori Overpriced, Underpriced, atau Fair Value.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl hover:border-amber-500/40 transition duration-300 group">
+                    <div class="w-14 h-14 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition duration-300 border border-amber-500/20">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Simulasi KPR Amortisasi</h3>
+                    <p class="text-sm text-slate-400 mt-2 leading-relaxed">Hitung angsuran, suku bunga, uang muka (DP), dan ekspor jadwal amortisasi tahunan ke CSV.</p>
+                </div>
+
+                <div class="glass-card p-6 rounded-3xl hover:border-purple-500/40 transition duration-300 group">
+                    <div class="w-14 h-14 bg-purple-500/10 text-purple-400 rounded-2xl flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition duration-300 border border-purple-500/20">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white">Neighborhood Radar</h3>
+                    <p class="text-sm text-slate-400 mt-2 leading-relaxed">Penyajian skor WalkScore, TransitScore, Safety Index, serta radar fasilitas umum sekitar.</p>
+                </div>
+            </div>
+
+            <!-- Quick Showcase Section -->
+            <div class="glass-card rounded-3xl p-8 sm:p-10">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Properti Pilihan Teratas</h2>
+                        <p class="text-slate-400 text-sm mt-1">Listing properti lengkap dengan estimasi valuation AI real-time.</p>
+                    </div>
+                    <button onclick="switchTab('properties')" class="text-indigo-400 hover:text-indigo-300 font-bold text-sm flex items-center gap-2 bg-indigo-500/10 px-4 py-2.5 rounded-xl border border-indigo-500/20 transition">
+                        Lihat Seluruh Katalog <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="home-featured-properties">
+                    <!-- Dynamic Content from JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: PREDIKSI HARGA AI -->
+        <section id="tab-predict" class="tab-content hidden space-y-8">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-10">
+                    <div class="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold px-4 py-1.5 rounded-full uppercase tracking-wider mb-3">
+                        <i class="fa-solid fa-microchip"></i> Decision Tree Machine Learning Model
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl font-black text-white">Engine Prediksi Harga AI</h1>
+                    <p class="text-slate-400 mt-3 text-base max-w-2xl mx-auto">Masukkan parameter spesifikasi fisik rumah. Model AI Decision Tree Regressor akan memperhitungkan nilai estimasi pasar wajar secara otomatis.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Form Input -->
+                    <div class="lg:col-span-7 glass-card p-8 rounded-3xl">
+                        <form id="predictionForm" class="space-y-5" onsubmit="event.preventDefault(); runPrediction();">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Luas Bangunan (sqft)</label>
+                                    <input type="number" id="pred_sqft" required value="1800" min="200" max="10000" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                    <span class="text-[11px] text-slate-500 mt-1 block">1 sqft ≈ 0.09 m²</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Konstruksi / Grade (1-13)</label>
+                                    <select id="pred_grade" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                        <option value="4">Grade 4 - Sangat Sederhana</option>
+                                        <option value="6">Grade 6 - Standar Menengah</option>
+                                        <option value="7" selected>Grade 7 - Bagus / Rata-rata</option>
+                                        <option value="9">Grade 9 - Desain Mewah & Material Baik</option>
+                                        <option value="11">Grade 11 - Premier Custom Built</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Kamar Tidur</label>
+                                    <input type="number" id="pred_beds" min="1" max="10" required value="3" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Kamar Mandi</label>
+                                    <input type="number" step="0.5" id="pred_baths" min="1" max="10" required value="2" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Jumlah Lantai</label>
+                                    <input type="number" step="0.5" id="pred_floors" min="1" max="4" required value="2" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Tahun Bangunan</label>
+                                    <input type="number" id="pred_yr" min="1900" max="2026" required value="2015" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-600/30 transition duration-300 flex items-center justify-center gap-2.5 mt-6 text-sm">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Hitung Estimasi AI Sekarang
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Output Results Panel -->
+                    <div class="lg:col-span-5 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-8 rounded-3xl border border-slate-800 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div>
+                            <span class="text-xs uppercase font-bold tracking-widest text-indigo-400"><i class="fa-solid fa-square-poll-vertical mr-1.5"></i> Output Valuation Model</span>
+                            <div class="mt-6">
+                                <span class="text-xs text-slate-400 block font-medium">Estimasi Nilai Pasar Wajar:</span>
+                                <div id="result-price" class="text-3xl sm:text-4xl font-black text-emerald-400 mt-2 tracking-tight">Rp 3.500.000.000</div>
+                                <span class="text-xs text-slate-400 mt-2 block font-medium" id="result-idr">Estimasi berbasis Model Decision Tree</span>
+                            </div>
+
+                            <hr class="border-slate-800 my-6">
+
+                            <div class="space-y-4">
+                                <div>
+                                    <span class="text-xs text-slate-400 block mb-1">Status Kategori Pasar:</span>
+                                    <span id="result-status" class="inline-block px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">Fair Market Value</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block mb-1">Rata-rata Harga per sqft:</span>
+                                    <span id="result-sqft-price" class="text-base font-bold text-slate-200">Rp 1.944.444 / sqft</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block mb-1">Tingkat Kepercayaan Model:</span>
+                                    <span class="text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-circle-check text-xs"></i> 92.4% Accuracy Rate
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-800">
+                            <button onclick="transferToKPR()" class="w-full bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/30 font-bold py-3 rounded-xl text-xs transition duration-200 flex items-center justify-center gap-2">
+                                Simulasikan KPR Harga Ini <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: KATALOG PROPERTI -->
+        <section id="tab-properties" class="tab-content hidden space-y-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Katalog Listing Properti</h1>
+                    <p class="text-slate-400 text-sm mt-1">Portal listing rumah dengan fitur simulasi sewa, radar lingkungan, dan penanda favorit.</p>
+                </div>
+                <!-- Filter Bar -->
+                <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                    <input type="text" id="searchProperty" onkeyup="filterProperties()" placeholder="Cari nama atau lokasi..." class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-grow md:w-64">
+                    <select id="filterStatus" onchange="filterProperties()" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="ALL">Semua Status AI</option>
+                        <option value="Underpriced">Underpriced</option>
+                        <option value="Fair Value">Fair Value</option>
+                        <option value="Overpriced">Overpriced</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Detail Modal Property / Map Radar Preview -->
+            <div id="property-detail-modal" class="hidden glass-panel text-white p-6 sm:p-8 rounded-3xl shadow-2xl mb-8 relative border border-slate-700">
+                <button onclick="closeDetailModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-xl p-2.5 bg-slate-800 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <div class="lg:col-span-5">
+                        <div class="relative">
+                            <img id="modal-img" src="" class="w-full h-64 object-cover rounded-2xl mb-4 shadow-lg">
+                            <span class="absolute bottom-6 right-3 bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-xl border border-slate-700">
+                                <i class="fa-solid fa-vr-cardboard text-indigo-400 mr-1.5"></i> Tour Virtual 360°
+                            </span>
+                        </div>
+                        <h3 id="modal-title" class="text-2xl font-bold"></h3>
+                        <p id="modal-location" class="text-xs text-indigo-400 font-bold uppercase mt-1 tracking-wider"></p>
+                        <div id="modal-price" class="text-3xl font-black text-emerald-400 mt-3"></div>
+                    </div>
+                    <div class="lg:col-span-7 space-y-5">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-shield-halved text-indigo-400"></i> PropValue Neighborhood Rating</h4>
+                        <div class="grid grid-cols-3 gap-3 text-center" id="modal-scores">
+                            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Walk Score</span>
+                                <span id="score-walk" class="text-xl font-bold text-emerald-400">88/100</span>
+                            </div>
+                            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Transit Score</span>
+                                <span id="score-transit" class="text-xl font-bold text-indigo-400">79/100</span>
+                            </div>
+                            <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
+                                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Safety Index</span>
+                                <span id="score-safety" class="text-xl font-bold text-amber-400">94/100</span>
+                            </div>
+                        </div>
+
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2 mt-4"><i class="fa-solid fa-radar text-indigo-400"></i> Radar Fasilitas Umun Terdekat</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" id="modal-facilities">
+                            <!-- Facilities injected by JS -->
+                        </div>
+
+                        <hr class="border-slate-800 my-4">
+
+                        <h4 class="font-bold text-xs text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-chart-line text-emerald-400"></i> Proyeksi Investasi & Yield</h4>
+                        <div class="grid grid-cols-2 gap-4 text-xs">
+                            <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
+                                <span class="text-slate-400 block">Estimasi Sewa / Thn:</span>
+                                <span id="modal-yield" class="text-sm font-bold text-emerald-300 mt-1 block"></span>
+                            </div>
+                            <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
+                                <span class="text-slate-400 block">Proyeksi Capital Gain 5 Thn:</span>
+                                <span id="modal-gain" class="text-sm font-bold text-indigo-300 mt-1 block">+35% - +45%</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex gap-4">
+                            <button onclick="openBookingModal()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-6 py-3 rounded-xl text-xs transition shadow-lg shadow-indigo-600/30">
+                                <i class="fa-solid fa-calendar-check mr-1.5"></i> Jadwalkan Survey Lokasi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listing Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="properties-grid">
+                <!-- Dynamic Content from JS -->
+            </div>
+        </section>
+
+        <!-- TAB KOMPARASI PROPERTI -->
+        <section id="tab-compare" class="tab-content hidden space-y-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-white">⚖️ Komparasi Properti Sanding-ke-Sanding</h1>
+                    <p class="text-slate-400 mt-2 text-sm">Bandingkan 2 unit pilihan Anda untuk melihat perbedaan spesifikasi, harga per sqft, dan penilaian AI secara langsung.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Pilih Properti 1</label>
+                        <select id="compare_prop_1" onchange="updateComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Pilih Properti 2</label>
+                        <select id="compare_prop_2" onchange="updateComparison()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-3xl overflow-hidden border border-slate-800" id="compare-table-container">
+                    <!-- Comparison Table Rendered by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: KALKULATOR KPR & KELAYAKAN -->
+        <section id="tab-calculator" class="tab-content hidden space-y-8">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl sm:text-5xl font-black text-white">🧮 Kalkulator KPR & Amortisasi</h1>
+                    <p class="text-slate-400 mt-3 text-base">Hitung angsuran KPR, rasio kelayakan cicilan gaji, serta lihat tabel amortisasi tahunan.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                    <!-- Form Kalkulator KPR -->
+                    <div class="lg:col-span-7 glass-card p-8 rounded-3xl space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Harga Rumah (Rp)</label>
+                            <input type="number" id="kpr_price" value="2500000000" step="50000000" oninput="calculateKPR()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Uang Muka / DP (%)</label>
+                                <input type="number" id="kpr_dp_percent" value="20" min="5" max="90" oninput="calculateKPR()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Suku Bunga (% / Tahun)</label>
+                                <input type="number" id="kpr_rate" value="6.5" step="0.1" oninput="calculateKPR()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 uppercase mb-2">Jangka Waktu / Tenor (Tahun)</label>
+                            <select id="kpr_tenure" onchange="calculateKPR()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm">
+                                <option value="10">10 Tahun (120 Bulan)</option>
+                                <option value="15">15 Tahun (180 Bulan)</option>
+                                <option value="20" selected>20 Tahun (240 Bulan)</option>
+                                <option value="25">25 Tahun (300 Bulan)</option>
+                            </select>
+                        </div>
+                        
+                        <hr class="border-slate-800 my-4">
+                        
+                        <!-- Cek Kelayakan Gaji -->
+                        <div class="bg-indigo-950/60 border border-indigo-500/30 p-5 rounded-2xl space-y-3">
+                            <h4 class="font-bold text-xs uppercase text-indigo-300 tracking-wider flex items-center gap-2"><i class="fa-solid fa-user-check"></i> Cek Kelayakan Gaji (Rasio DTI Max 35%)</h4>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1.5">Total Penghasilan Bulanan (Rp)</label>
+                                <input type="number" id="user_income" value="35000000" oninput="calculateKPR()" placeholder="Contoh: 35000000" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm text-white focus:outline-none">
+                            </div>
+                            <div id="eligibility-status" class="text-xs font-bold px-4 py-2.5 rounded-xl text-center bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                                Status Kelayakan Gaji: Memenuhi Syarat
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Panel & Chart -->
+                    <div class="lg:col-span-5 bg-slate-900/90 border border-slate-800 p-8 rounded-3xl flex flex-col justify-between shadow-2xl">
+                        <div>
+                            <h3 class="font-bold text-white border-b border-slate-800 pb-3 text-sm uppercase tracking-wider">Ringkasan Pembiayaan</h3>
+                            
+                            <div class="mt-6 space-y-4">
+                                <div>
+                                    <span class="text-xs text-slate-400 block">Estimasi Cicilan per Bulan:</span>
+                                    <span id="kpr-monthly" class="text-3xl font-black text-indigo-400 tracking-tight mt-1 block">Rp 14.911.455</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3 text-sm pt-2">
+                                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                                        <span class="text-[11px] text-slate-400 block">Uang Muka (DP):</span>
+                                        <span id="kpr-dp-val" class="font-bold text-slate-200 mt-0.5 block">Rp 500.000.000</span>
+                                    </div>
+                                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                                        <span class="text-[11px] text-slate-400 block">Total Pokok KPR:</span>
+                                        <span id="kpr-principal" class="font-bold text-slate-200 mt-0.5 block">Rp 2.000.000.000</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Visual Chart -->
+                            <div class="mt-6 h-44">
+                                <canvas id="kprChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amortization Schedule Table -->
+                <div class="glass-card p-8 rounded-3xl">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">📊 Tabel Amortisasi Pembayaran KPR</h3>
+                            <p class="text-xs text-slate-400 mt-1">Rincian pembagian pembayaran pokok vs bunga per tahun secara mendalam.</p>
+                        </div>
+                        <button onclick="exportAmortizationCSV()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                            <i class="fa-solid fa-file-csv"></i> Export ke CSV
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-80 rounded-xl border border-slate-800">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900 text-slate-300 sticky top-0 border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3.5">Tahun Ke</th>
+                                    <th class="p-3.5">Bayar Pokok</th>
+                                    <th class="p-3.5">Bayar Bunga</th>
+                                    <th class="p-3.5">Sisa Pinjaman</th>
+                                </tr>
+                            </thead>
+                            <tbody id="amortization-tbody" class="divide-y divide-slate-800/60 bg-slate-950/40">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: INVESTASI & ROI YIELD -->
+        <section id="tab-investment" class="tab-content hidden space-y-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-bold text-white">📈 Analisis ROI & Net Rental Yield</h1>
+                    <p class="text-slate-400 mt-2 text-sm">Simulasikan arus kas (Cash Flow) bersih per tahun dan tingkat pengembalian modal investasi properti Anda.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Calculator Inputs -->
+                    <div class="glass-card p-8 rounded-3xl space-y-4">
+                        <h3 class="font-bold text-white border-b border-slate-800 pb-3 text-xs uppercase tracking-widest text-indigo-400">Parameter Investasi</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Harga Pembelian Properti (Rp)</label>
+                            <input type="number" id="inv_price" value="2000000000" step="50000000" oninput="calculateROI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Estimasi Sewa Bulanan (Rp)</label>
+                            <input type="number" id="inv_rent" value="12000000" step="500000" oninput="calculateROI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Biaya Maintenance/Thn (Rp)</label>
+                                <input type="number" id="inv_maint" value="10000000" step="1000000" oninput="calculateROI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Pajak Properti/Thn (Rp)</label>
+                                <input type="number" id="inv_tax" value="15000000" step="1000000" oninput="calculateROI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output ROI -->
+                    <div class="bg-gradient-to-b from-slate-900 to-slate-950 p-8 rounded-3xl border border-slate-800 flex flex-col justify-between shadow-2xl">
+                        <div>
+                            <span class="text-xs uppercase font-bold text-indigo-400 tracking-wider">Proyeksi Imbal Hasil</span>
+                            
+                            <div class="mt-6 space-y-5">
+                                <div>
+                                    <span class="text-xs text-slate-400 block">Gross Rental Yield:</span>
+                                    <span id="roi-gross" class="text-2xl font-bold text-emerald-400 mt-1 block">7.20%</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block">Net Rental Yield (Setelah Biaya):</span>
+                                    <span id="roi-net" class="text-4xl font-black text-indigo-300 tracking-tight mt-1 block">5.95%</span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block">Pendapatan Sewa Bersih / Tahun:</span>
+                                    <span id="roi-cashflow" class="text-xl font-bold text-slate-100 mt-1 block">Rp 119.000.000</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-4 border-t border-slate-800 text-xs text-slate-400">
+                            💡 Net Yield di atas 5% dikategorikan sebagai investasi properti berkinerja tinggi.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: FAVORIT SAYA -->
+        <section id="tab-saved" class="tab-content hidden space-y-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white">❤️ Properti Favorit Tersimpan</h1>
+                <p class="text-slate-400 text-sm mt-1">Daftar properti yang telah Anda simpan untuk ditinjau ulang nanti.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="saved-properties-grid">
+                <!-- Injected by JS -->
+            </div>
+        </section>
+
+        <!-- TAB 5: PORTAL EDUKASI -->
+        <section id="tab-education" class="tab-content hidden space-y-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <h1 class="text-3xl font-bold text-white">📚 Portal Edukasi & Legalitas Properti</h1>
+                    <p class="text-slate-400 mt-2 text-sm">Pelajari hukum pertanahan, perbedaan jenis sertifikat, serta tips finansial dalam transaksi properti.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Article 1 -->
+                    <div class="glass-card p-8 rounded-3xl hover:border-indigo-500/40 transition">
+                        <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold px-3 py-1 rounded-full">Legalitas Hukum</span>
+                        <h3 class="text-xl font-bold text-white mt-4">Perbedaan SHM, HGB, dan AJB</h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Sertifikat Hak Milik (SHM) merupakan kasta tertinggi kepemilikan tanah. Hak Guna Bangunan (HGB) memiliki batas waktu 30 tahun, sedangkan Akta Jual Beli (AJB) adalah bukti transaksi sebelum terbit sertifikat.
+                        </p>
+                    </div>
+
+                    <!-- Article 2 -->
+                    <div class="glass-card p-8 rounded-3xl hover:border-emerald-500/40 transition">
+                        <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full">Finansial & Pajak</span>
+                        <h3 class="text-xl font-bold text-white mt-4">Memahami Biaya BPHTB & Notaris</h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Bea Perolehan Hak atas Tanah dan Bangunan (BPHTB) dihitung sebesar 5% dari (NOP - NOPTKP). Pastikan menyiapkan dana cadangan 10% di luar harga rumah untuk biaya transaksi legal.
+                        </p>
+                    </div>
+
+                    <!-- Article 3 -->
+                    <div class="glass-card p-8 rounded-3xl hover:border-amber-500/40 transition">
+                        <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-1 rounded-full">Panduan Pemula</span>
+                        <h3 class="text-xl font-bold text-white mt-4">Checklist Survey Rumah Pertama</h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Saat survey lokasi, perhatikan struktur fondasi, bekas resapan air di plafon, legalitas IMB/PBG, daya listrik, sumber air bersih, serta aksesibilitas ke fasilitas umum.
+                        </p>
+                    </div>
+
+                    <!-- Article 4 -->
+                    <div class="glass-card p-8 rounded-3xl hover:border-purple-500/40 transition">
+                        <span class="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold px-3 py-1 rounded-full">Investasi</span>
+                        <h3 class="text-xl font-bold text-white mt-4">Menghitung Capital Gain & Rental Yield</h3>
+                        <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+                            Rental Yield ideal untuk rumah tapak berada di angka 3%-5% per tahun dari nilai aset, sedangkan apartemen berkisar 6%-8%. Gunakan angka ini untuk mengukur potensi ROI investasi sewa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800/80 text-slate-400 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm space-y-2">
+            <p>&copy; 2026 PropValue AI - Platform PropTech & Valuation Properti Bebas Izin.</p>
+            <p class="text-xs text-slate-500">Dikembangkan menggunakan Machine Learning Decision Tree Engine & Tailwind CSS.</p>
+        </div>
+    </footer>
+
+    <!-- LINK KE FILE JAVASCRIPT DARI FOLDER static/js/main.js -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
